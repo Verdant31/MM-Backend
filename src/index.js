@@ -19,10 +19,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(process.env.PORT || 3001);
 app.use(cors(corsOptions))
 
+
+//Adiciona um imóvel no banco de dados
 app.post('/addimmobile', (req, res) => {
-  console.log(req.body);
   const data = req.body
-  functions.AddProduct(data.images, data.type, data.price, data.size, data.bathrooms, data.rooms, data.suites, data.slots, data.street, data.district, data.cep, data.city)
+  functions.AddProduct(data.images, data.type, data.price, data.size, data.bathrooms, data.rooms, data.suites, data.slots, data.street, data.district, data.cep, data.city, data.isExclusive)
     .catch(function (err) {
       if (err) {
         console.log(err);
@@ -30,9 +31,9 @@ app.post('/addimmobile', (req, res) => {
     })
 })
 
-app.put('/updateproduct', (req, res) => {
+//Edita um produto no banco de dados
+app.put('/updateimmobile', (req, res) => {
   const data = req.body;
-
   const dbRef = firebase.database();
   dbRef.ref('imóveis/' + data.id).update({
     fotosDoTerreno: data.images,
@@ -50,19 +51,47 @@ app.put('/updateproduct', (req, res) => {
   })
 })
 
-app.get('/getproducts', (req, res) => {
-  const { page = 1, per_page = 5 } = req.query;
-
-  const pageStart = (Number(page) - 1) * Number(per_page) + 1;
-  const pageEnd = pageStart + Number(per_page);
-
+//Pega os dados de todos os impóveis cadastrados, separado por página
+app.get('/getimmobiles', (req, res) => {
+  const { page, limit = 10 } = req.query;
+  const startIndex = (Number(page) - 1) * Number(limit);
+  const endIndex = Number(page) * Number(limit);
   const dbRef = firebase.database();
   dbRef.ref().child("imóveis").get()
     .then((snapshot) => {
       if (snapshot.exists()) {
-        const preData = Object.keys(snapshot.val()).map((key) => snapshot.val()[key]).slice(pageStart, pageEnd)
-        const data = preData.slice(pageStart, pageEnd);
-        return res.set('x-total-count', String(data.length)).json(data);
+        const data = snapshot.val();
+        const preData = Object.keys(snapshot.val()).map(key => {
+          return {
+            id: key,
+            image: data[key].fotosDoTerreno,
+            type: data[key].tipo,
+            price: data[key].preco,
+            size: data[key].tamanho,
+            toilets: data[key].banheiros,
+            rooms: data[key].quartos,
+            suites: data[key].suites,
+            slots: data[key].vagas
+          }
+        });
+
+        const immobiles = preData.slice(startIndex, endIndex);
+        return res.set('x-total-count', String(preData.length)).json(immobiles);
+      } else {
+        console.log("No data available")
+      }
+    }).catch(function (error) {
+      console.log(error);
+    })
+})
+
+app.get('/products', (req, res) => {
+  const dbRef = firebase.database();
+  dbRef.ref().child("imóveis").get()
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        res.send(data);
       } else {
         console.log("No data available")
       }
@@ -72,7 +101,6 @@ app.get('/getproducts', (req, res) => {
 })
 
 app.delete('/deleteproduct/:id', (req, res) => {
-  console.log(req.params.id);
   let id = req.params.id;
   const dbRef = firebase.database();
   dbRef.ref().child("imóveis").child(id).remove().catch(err => {
@@ -82,7 +110,6 @@ app.delete('/deleteproduct/:id', (req, res) => {
 
 app.get('/getimmobile/:id', (req, res) => {
   let id = req.params.id;
-  console.log(id)
   const dbRef = firebase.database();
   dbRef.ref().child("imóveis").child(id).get()
     .then((snapshot) => {

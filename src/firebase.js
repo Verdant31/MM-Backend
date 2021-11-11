@@ -12,7 +12,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
-module.exports.AddProduct = async (images, type, price, size, bathrooms, rooms, suites, slots, street, district, cep, city) => {
+module.exports.AddProduct = async (images, type, price, size, bathrooms, rooms, suites, slots, street, district, cep, city, isExclusive) => {
   const productRef = firebase.database();
   await productRef.ref('imóveis').push({
     fotosDoTerreno: images,
@@ -26,7 +26,8 @@ module.exports.AddProduct = async (images, type, price, size, bathrooms, rooms, 
     rua: street,
     bairro: district,
     cep: cep,
-    cidade: city
+    cidade: city,
+    exclusivo: isExclusive
   })
 }
 

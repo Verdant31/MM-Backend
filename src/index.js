@@ -8,7 +8,7 @@ const functions = require('./firebase');
 const app = express();
 
 const corsOptions = {
-  origin: ['https://mm-dashboard.vercel.app/dashboard', 'https://mm-frontend-lmjn87glw-verdant31.vercel.app'],
+  origin: ['https://mm-dashboard.vercel.app', 'https://mm-frontend.vercel.app'],
   methods: ['GET', 'PUT', 'POST', 'DELETE'],
   credentials: true,
   optionSuccessStatus: 200,

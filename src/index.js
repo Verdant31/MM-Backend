@@ -8,7 +8,8 @@ const functions = require('./firebase');
 const app = express();
 
 const corsOptions = {
-  origin: 'https://mmdashboard.netlify.app',
+  origin: 'https://mm-dashboard-i4hrl92jq-verdant31.vercel.app',
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
   credentials: true,
   optionSuccessStatus: 200,
   exposedHeaders: ['x-total-count']
